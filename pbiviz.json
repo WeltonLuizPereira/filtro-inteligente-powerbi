@@ -1,0 +1,23 @@
+{
+    "visual": {
+        "name": "filtroInteligentePro",
+        "displayName": "Filtro Inteligente",
+        "guid": "filtroInteligenteProA1B2C3D4E5F60718293A4B5C6D7E8F90",
+        "visualClassName": "Visual",
+        "version": "2.0.0.0",
+        "description": "Filtros com ordenacao inteligente (meses, dias, numeros e datas), em cabecalho ou menu lateral.",
+        "supportUrl": "https://github.com/WeltonLuizPereira/filtro-inteligente-powerbi/issues",
+        "gitHubUrl": "https://github.com/WeltonLuizPereira/filtro-inteligente-powerbi"
+    },
+    "apiVersion": "5.11.0",
+    "author": {
+        "name": "WeltonLuizPereira",
+        "email": "43457206+WeltonLuizPereira@users.noreply.github.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": [],
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json"
+}

@@ -1,0 +1,192 @@
+// Filtro Inteligente — tokens vêm de variáveis CSS definidas em visual.ts (applyTheme)
+.sfp {
+    --muted: color-mix(in srgb, var(--fg) 56%, var(--bg));
+    --line: color-mix(in srgb, var(--fg) 14%, var(--bg));
+    --wash: color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --acc-soft: color-mix(in srgb, var(--acc) 14%, var(--panel));
+    --r-sm: calc(var(--r) * 0.6);
+    --r-lg: calc(var(--r) + 4px);
+
+    position: relative; width: 100%; height: 100%; overflow: hidden; box-sizing: border-box;
+    background: transparent; color: var(--fg);
+    font-family: var(--font); font-size: var(--fs); line-height: 1.3;
+    font-variant-numeric: tabular-nums;
+
+    * { box-sizing: border-box; }
+    button { font: inherit; color: inherit; cursor: pointer; background: none; border: 0; padding: 0; text-align: left; }
+    button:focus-visible, input:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+
+    /* ---------- barra ---------- */
+    padding: 4px;
+
+    // cabeçalho: [logo + título]  ............  [filtros]
+    .sfp-header { position: relative; display: flex; align-items: center; gap: 16px; height: var(--hh); padding: 0 14px;
+        background: var(--head-bg); border-radius: var(--r-lg); }
+    .sfp-brand { display: flex; align-items: center; gap: 12px; flex: 0 1 auto; min-width: 0; max-width: 58%; height: 100%;
+        &.vert { height: auto; max-width: none; padding: 10px 12px 2px; }
+        &.vert .sfp-logo { height: calc(var(--hh) * var(--logo-k) - 16px); } }
+    // o logo acompanha a altura do cabeçalho; a largura segue a proporção original
+    .sfp-logo-box { position: relative; flex: none; display: flex; align-items: center; height: 100%; max-width: 100%;
+        &:hover .sfp-logo-tools, &:focus-within .sfp-logo-tools { opacity: 1; } }
+    .sfp-logo-tools { position: absolute; top: 4px; right: 2px; display: flex; gap: 3px; opacity: 0; transition: opacity .12s ease; }
+    .sfp-logo-btn { width: 18px; height: 18px; line-height: 17px; text-align: center; border-radius: 50%; background: var(--fg); color: var(--bg); font-size: 12px; font-weight: 700;
+        &:hover { background: var(--acc); color: var(--on-acc); } }
+    .sfp-logo-add { display: inline-flex; align-items: center; gap: 8px; height: calc(var(--hh) - 20px); padding: 0 14px; border-radius: var(--r);
+        box-shadow: inset 0 0 0 1.5px var(--line); color: var(--muted); font-weight: 500; white-space: nowrap;
+        &:hover { color: var(--fg); box-shadow: inset 0 0 0 1.5px var(--acc); background: var(--acc-soft); }
+        .sfp-logo-plus { font-size: 1.3em; line-height: 1; color: var(--acc); font-weight: 700; } }
+    .sfp-logo { display: block; flex: none; height: calc((var(--hh) - 16px) * var(--logo-k)); width: auto; max-width: 100%;
+        object-fit: contain; image-rendering: auto; user-select: none; -webkit-user-drag: none; }
+    .sfp-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--title-fg);
+        font-size: var(--title-fs); font-weight: 700; letter-spacing: .005em; }
+
+    .sfp-bar { flex: 1 1 auto; min-width: 0; height: 100%; display: flex; flex-wrap: nowrap; gap: 6px; padding: 3px 2px; align-items: center;
+        overflow-x: auto; overflow-y: hidden; scrollbar-width: none; &::-webkit-scrollbar { display: none; }
+        &.al-center { justify-content: center; } &.al-right { justify-content: flex-end; } }
+    .sfp-bar > * { flex: none; }
+
+    // botão de uma linha: o nome do campo é o próprio título
+    .sfp-btn {
+        position: relative; display: inline-flex; align-items: center; gap: 7px;
+        max-width: 240px; padding: 5px 9px 5px 11px; border-radius: var(--r); background: var(--bg);
+        box-shadow: inset 0 0 0 1px var(--line); font-weight: 500; letter-spacing: .01em; white-space: nowrap;
+        transition: background .12s ease, box-shadow .12s ease;
+        &::before { content: ""; position: absolute; left: 8px; right: 8px; top: 0; height: 2px; border-radius: 0 0 2px 2px;
+            background: var(--acc); transform: scaleX(0); transition: transform .16s ease; }
+        &:hover { background: var(--wash); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 24%, var(--bg)); }
+        &.on { box-shadow: inset 0 0 0 1px var(--acc); }
+        &.on::before { transform: scaleX(1); }
+        &.open { background: var(--acc-soft); box-shadow: inset 0 0 0 1px var(--acc); }
+        .sfp-name { overflow: hidden; text-overflow: ellipsis; }
+        .sfp-pill { flex: none; max-width: 96px; overflow: hidden; text-overflow: ellipsis; padding: 1px 7px; border-radius: 99px;
+            background: var(--acc); color: var(--on-acc); font-size: .86em; font-weight: 700; line-height: 1.4; }
+        .sfp-chev { flex: none; width: 5px; height: 5px; margin: 0 1px 3px 1px; border: solid var(--muted); border-width: 0 1.5px 1.5px 0;
+            transform: rotate(45deg); transition: transform .14s ease; }
+        &.open .sfp-chev { transform: rotate(-135deg); margin-bottom: -2px; }
+    }
+    .sfp-ico { flex: none; width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; color: var(--muted);
+        circle { fill: var(--bg); } }
+    .sfp-more:hover .sfp-ico, .sfp-more.open .sfp-ico { color: var(--fg); }
+    .sfp-sep { width: 1px; height: 18px; margin: 0 2px; background: var(--line); }
+    .sfp-clear { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; margin-left: 2px; border-radius: var(--r);
+        color: var(--danger); font-weight: 500; font-size: .94em; white-space: nowrap;
+        &:hover:not(:disabled) { background: color-mix(in srgb, var(--danger) 12%, var(--bg)); }
+        &.off { opacity: .4; cursor: default; }
+        .sfp-clear-x { font-size: 1.15em; line-height: 1; } }
+
+    /* ---------- chips ---------- */
+    .sfp-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 10px 8px; }
+    .sfp-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 3px 6px 3px 10px;
+        border-radius: 99px; background: var(--wash); box-shadow: inset 0 0 0 1px var(--line);
+        &:hover:not(.static) { background: var(--acc-soft); box-shadow: inset 0 0 0 1px var(--acc); }
+        &.static { padding-right: 10px; cursor: default; color: var(--muted); }
+        .sfp-chip-f { color: var(--muted); font-size: .88em; }
+        .sfp-chip-v { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sfp-x { width: 16px; height: 16px; line-height: 15px; text-align: center; border-radius: 50%; color: var(--muted); font-size: 1.1em; }
+        &:hover .sfp-x { background: var(--acc); color: var(--on-acc); } }
+
+    /* ---------- painel ---------- */
+    .sfp-panel {
+        position: absolute; z-index: 5; width: 320px; max-width: calc(100% - 12px);
+        display: flex; flex-direction: column; overflow: hidden;
+        background: var(--panel); border-radius: var(--r-lg); box-shadow: 0 0 0 1px var(--line);
+        transform-origin: top left; animation: sfp-in .14s ease-out;
+        &.grid-panel { width: 340px; }
+        &.wide { width: 340px; }
+        &.overlay { inset: 6px; width: auto; max-width: none; }
+    }
+    &.shadow .sfp-panel { box-shadow: 0 0 0 1px var(--line), 0 14px 34px -8px rgba(0,0,0,.32); }
+    @keyframes sfp-in { from { opacity: 0; transform: translateY(-4px) scale(.98); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { .sfp-panel { animation: none; } .sfp-btn::before { transition: none; } }
+
+    .sfp-search-row { padding: 10px 10px 4px; }
+    .sfp-head { display: flex; gap: 4px; align-items: center; padding: 4px 8px 6px; }
+    .sfp-spacer { flex: 1; }
+    .sfp-search { display: block; width: 100%; height: 38px; padding: 0 12px 0 38px; border: 0; border-radius: var(--r); background-color: var(--wash);
+        color: inherit; font: inherit; font-size: 1.08em;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%238A8A8A' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='9' cy='9' r='5.5'/%3E%3Cpath d='M13.5 13.5L17 17'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: 12px center; background-size: 16px;
+        &::placeholder { color: var(--muted); }
+        &:focus { outline: 2px solid var(--acc); outline-offset: 0; } }
+    .sfp-mini { height: 30px; padding: 0 9px; border-radius: var(--r-sm); font-weight: 600; font-size: .92em; color: var(--acc);
+        &:hover { background: var(--acc-soft); }
+        &.ghost { color: var(--muted); font-weight: 500; } }
+
+    .sfp-seg { display: flex; gap: 2px; margin: 0 8px 6px; padding: 2px; border-radius: var(--r-sm); background: var(--wash); }
+    .sfp-seg-b { flex: 1; padding: 4px 0; text-align: center; border-radius: calc(var(--r-sm) - 2px); color: var(--muted); font-size: .9em;
+        &:hover { color: var(--fg); }
+        &.on { background: var(--panel); color: var(--fg); font-weight: 600; box-shadow: 0 0 0 1px var(--line); } }
+
+    .sfp-scroll { overflow-y: auto; padding: 2px 6px 6px; flex: 1; min-height: 60px; }
+    .sfp-foot { padding: 6px 12px 8px; color: var(--muted); font-size: .86em; border-top: 1px solid var(--line); }
+
+    /* lista */
+    .sfp-row { position: relative; display: flex; align-items: center; border-radius: var(--r-sm);
+        &:hover { background: var(--wash); }
+        &:hover .sfp-only, .sfp-only:focus-visible { opacity: 1; } }
+    .sfp-opt { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 6px 8px; }
+    .sfp-box { flex: none; width: 16px; height: 16px; border-radius: calc(var(--r-sm) * .5); box-shadow: inset 0 0 0 1.5px var(--muted); position: relative; }
+    .sfp-row.on .sfp-box { background: var(--acc); box-shadow: none;
+        &::after { content: ""; position: absolute; left: 5px; top: 2px; width: 4px; height: 8px; border: solid var(--on-acc); border-width: 0 2px 2px 0; transform: rotate(45deg); } }
+    .sfp-txt { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sfp-row.on .sfp-txt { font-weight: 600; }
+    .sfp-cnt { color: var(--muted); font-size: .84em; }
+    .sfp-only { opacity: 0; position: absolute; right: 8px; padding: 2px 8px; border-radius: 99px; background: var(--panel); color: var(--acc);
+        font-size: .86em; font-weight: 600; box-shadow: 0 0 0 1px var(--line); }
+    .sfp-row:hover .sfp-cnt { visibility: hidden; }
+
+    /* grade (meses, dias, trimestres) e anos */
+    .sfp-grid { display: grid; gap: 6px; padding: 4px 2px;
+        &.c4 { grid-template-columns: repeat(4, 1fr); }
+        &.c7 { grid-template-columns: repeat(7, 1fr); gap: 4px; } }
+    .sfp-yrs { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px; }
+    .sfp-tile { min-height: 34px; padding: 6px 4px; text-align: center; border-radius: var(--r-sm); background: var(--wash); font-weight: 500;
+        transition: background .1s ease;
+        &:hover { background: var(--acc-soft); }
+        &.on { background: var(--acc); color: var(--on-acc); font-weight: 700; } }
+    .sfp-yrs .sfp-tile { min-width: 64px; }
+    .sfp-grid.wk .sfp-tile { padding: 6px 0; font-size: .92em; }
+
+    .sfp-empty { padding: 12px; color: var(--muted); }
+
+    /* ---------- menu lateral ---------- */
+    .sfp-side { width: var(--sw); height: 100%; display: flex; flex-direction: column; overflow: hidden; background: var(--head-bg); border-radius: var(--r-lg); }
+    .sfp-brand.vert { flex: none; flex-direction: column; align-items: center; justify-content: center; gap: 8px; height: auto; max-width: none;
+        padding: 18px 14px 6px; text-align: center;
+        .sfp-logo-box { align-self: center; height: auto; justify-content: center; }
+        .sfp-logo { height: auto; width: auto; max-width: 100%; max-height: calc(var(--hh) * var(--logo-k)); margin: 0 auto; }
+        .sfp-title { white-space: normal; overflow: visible; line-height: 1.2; text-align: center; } }
+    .sfp-side .sfp-chips { flex: none; padding: 0 14px 8px; }
+    .sfp-vhead { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 16px 8px; }
+    .sfp-vtitle { font-weight: 700; font-size: 1.08em; }
+    .sfp-side .sfp-clear { margin: 0; }
+
+    // botões do menu: mesmo desenho do cabeçalho, com o indicador na borda esquerda e seta para a direita
+    .sfp-nav-list { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 6px; padding: 4px 12px 14px; overflow-y: auto; }
+    .sfp-nav { display: flex; width: 100%; max-width: none; flex: none; padding: 9px 10px 9px 15px; text-align: left;
+        &::before { left: 0; right: auto; top: 9px; bottom: 9px; width: 3px; height: auto; border-radius: 0 3px 3px 0; transform: scaleY(0); }
+        &.on::before { transform: scaleY(1); }
+        .sfp-name { flex: 1; min-width: 0; }
+        .sfp-chev { transform: rotate(-45deg); margin: 0 2px 0 0; }
+        &.open .sfp-chev { transform: rotate(-45deg); margin-bottom: 3px; } }
+
+    // sub-menu que desliza para a direita do botão
+    .sfp-panel.fly { animation-name: sfp-in-x; transform-origin: left center; }
+    @keyframes sfp-in-x { from { opacity: 0; transform: translateX(-8px) scale(.98); } to { opacity: 1; transform: none; } }
+
+    // sanfona (usada no painel "Mais Filtros" do cabeçalho)
+    .sfp-acc-wrap { overflow-y: auto; padding: 4px 8px 10px; max-height: 100%; }
+    .sfp-panel .sfp-acc-wrap { max-height: 360px; }
+    .sfp-acc { border-radius: var(--r); margin-bottom: 4px;
+        &.on > .sfp-acc-h .sfp-acc-t { color: var(--acc); }
+        &.open { background: var(--wash); } }
+    .sfp-acc-h { width: 100%; display: flex; align-items: center; gap: 8px; padding: 10px; border-radius: var(--r);
+        &:hover { background: var(--wash); } }
+    .sfp-acc-t { font-weight: 600; flex: none; }
+    .sfp-acc-v { flex: 1; min-width: 0; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
+    .sfp-caret { flex: none; width: 7px; height: 7px; border: solid var(--muted); border-width: 0 2px 2px 0; transform: rotate(45deg); transition: transform .14s ease; margin: 0 4px 3px 2px; }
+    .sfp-acc.open .sfp-caret { transform: rotate(-135deg); margin-bottom: -2px; }
+    .sfp-acc-b { padding: 0 2px 8px; }
+    .sfp-acc-b .sfp-scroll { max-height: 240px; }
+    .sfp-acc-b .sfp-foot { border-top: 0; }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "filtro-inteligente-pro",
+  "version": "1.0.0",
+  "description": "Visual do Power BI: filtros com ordenacao inteligente (meses, dias, numeros, datas), cabecalho ou menu lateral.",
+  "scripts": {
+    "test": "tsc test/sort.test.ts src/sort.ts --outDir .testout --target es2019 --module commonjs --lib es2019 --skipLibCheck && node .testout/test/sort.test.js && node tools/audit.js",
+    "audit": "node tools/audit.js",
+    "build": "pbiviz package"
+  },
+  "type": "commonjs",
+  "devDependencies": {
+    "powerbi-visuals-tools": "^7.2.1",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "powerbi-models": "^2.2.0",
+    "powerbi-visuals-api": "^5.11.1",
+    "powerbi-visuals-utils-formattingmodel": "^7.1.0",
+    "powerbi-visuals-utils-interactivityutils": "^6.0.4"
+  },
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WeltonLuizPereira/filtro-inteligente-powerbi.git"
+  },
+  "homepage": "https://github.com/WeltonLuizPereira/filtro-inteligente-powerbi",
+  "bugs": {
+    "url": "https://github.com/WeltonLuizPereira/filtro-inteligente-powerbi/issues"
+  }
+}

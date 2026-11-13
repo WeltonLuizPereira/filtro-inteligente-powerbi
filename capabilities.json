@@ -1,0 +1,98 @@
+{
+    "dataRoles": [
+        { "name": "fields", "kind": "Grouping", "displayName": "Campos de filtro" }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [{ "fields": { "max": 10 } }],
+            "categorical": {
+                "categories": {
+                    "select": [{ "for": { "in": "fields" } }],
+                    "dataReductionAlgorithm": { "window": { "count": 30000 } }
+                }
+            }
+        }
+    ],
+    "sorting": { "default": {} },
+    "objects": {
+        "general": {
+            "properties": { "filter": { "type": { "filter": true } } }
+        },
+        "layout": {
+            "displayName": "Layout e comportamento",
+            "properties": {
+                "orientacao": { "displayName": "Estilo do visual", "type": { "enumeration": [
+                    { "value": "horizontal", "displayName": "Cabeçalho (barra horizontal)" },
+                    { "value": "vertical", "displayName": "Menu lateral (vertical)" } ] } },
+                "larguraMenu": { "displayName": "Largura do menu lateral (px)", "type": { "numeric": true } },
+                "numPrincipais": { "displayName": "Filtros visíveis na barra", "type": { "numeric": true } },
+                "alinhamento": { "displayName": "Alinhamento", "type": { "enumeration": [
+                    { "value": "left", "displayName": "Esquerda" },
+                    { "value": "center", "displayName": "Centro" },
+                    { "value": "right", "displayName": "Direita" } ] } },
+                "selecaoUnica": { "displayName": "Seleção única", "type": { "bool": true } },
+                "idioma": { "displayName": "Idioma", "type": { "enumeration": [
+                    { "value": "pt", "displayName": "Português" },
+                    { "value": "en", "displayName": "English" } ] } },
+                "mostrarBusca": { "displayName": "Busca nas listas", "type": { "bool": true } },
+                "mostrarOrdenacao": { "displayName": "Controle de ordenação", "type": { "bool": true } },
+                "mostrarChips": { "displayName": "Filtros aplicados (chips)", "type": { "bool": true } },
+                "mostrarLimpar": { "displayName": "Botão limpar tudo", "type": { "bool": true } },
+                "gradeCalendario": { "displayName": "Grade para meses e dias", "type": { "bool": true } },
+                "indicador": { "displayName": "Indicador no botão", "type": { "enumeration": [
+                    { "value": "texto", "displayName": "Valor selecionado" },
+                    { "value": "numero", "displayName": "Quantidade" } ] } }
+            }
+        },
+        "cabecalho": {
+            "displayName": "Cabeçalho, logo e título",
+            "properties": {
+                "altura": { "displayName": "Altura do cabeçalho / do logo (px)", "type": { "numeric": true } },
+                "corFundo": { "displayName": "Cor de fundo", "type": { "fill": { "solid": { "color": true } } } },
+                "fundoTransparente": { "displayName": "Fundo transparente", "type": { "bool": true } },
+                "mostrarLogo": { "displayName": "Mostrar logo", "type": { "bool": true } },
+                "logoUrl": { "displayName": "Logo (uso interno)", "type": { "text": true } },
+                "tamanhoLogo": { "displayName": "Tamanho do logo (%)", "type": { "numeric": true } },
+                "recortarLogo": { "displayName": "Recortar margens do logo", "type": { "bool": true } },
+                "removerFundoBranco": { "displayName": "Remover fundo branco do logo", "type": { "bool": true } },
+                "mostrarTitulo": { "displayName": "Mostrar título", "type": { "bool": true } },
+                "titulo": { "displayName": "Título", "type": { "text": true } },
+                "tamanhoTitulo": { "displayName": "Tamanho do título", "type": { "numeric": true } },
+                "corTitulo": { "displayName": "Cor do título", "type": { "fill": { "solid": { "color": true } } } }
+            }
+        },
+        "ordenacao": {
+            "displayName": "Ordenação",
+            "properties": {
+                "porCampo": { "displayName": "Ordenação por campo", "type": { "text": true } },
+                "modo": { "displayName": "Ordenação padrão", "type": { "enumeration": [
+                    { "value": "auto", "displayName": "Automático (meses, dias, números, datas)" },
+                    { "value": "original", "displayName": "Ordem do modelo" },
+                    { "value": "az", "displayName": "A → Z" },
+                    { "value": "za", "displayName": "Z → A" },
+                    { "value": "count", "displayName": "Mais frequentes" } ] } }
+            }
+        },
+        "aparencia": {
+            "displayName": "Aparência",
+            "properties": {
+                "corDestaque": { "displayName": "Cor de destaque", "type": { "fill": { "solid": { "color": true } } } },
+                "fundo": { "displayName": "Fundo dos botões e painéis", "type": { "fill": { "solid": { "color": true } } } },
+                "texto": { "displayName": "Cor do texto", "type": { "fill": { "solid": { "color": true } } } },
+                "fonte": { "displayName": "Fonte", "type": { "enumeration": [
+                    { "value": "Segoe UI", "displayName": "Segoe UI" },
+                    { "value": "Segoe UI Semibold", "displayName": "Segoe UI Semibold" },
+                    { "value": "Arial", "displayName": "Arial" },
+                    { "value": "Tahoma", "displayName": "Tahoma" },
+                    { "value": "Verdana", "displayName": "Verdana" },
+                    { "value": "DIN", "displayName": "DIN" } ] } },
+                "tamanhoFonte": { "displayName": "Tamanho da fonte", "type": { "numeric": true } },
+                "raio": { "displayName": "Arredondamento (px)", "type": { "numeric": true } },
+                "sombra": { "displayName": "Sombra no painel", "type": { "bool": true } },
+                "borda": { "displayName": "Borda nos botões", "type": { "bool": true } },
+                "modoEscuro": { "displayName": "Modo escuro", "type": { "bool": true } }
+            }
+        }
+    },
+    "privileges": []
+}
