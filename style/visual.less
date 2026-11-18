@@ -49,8 +49,8 @@
     // botão de uma linha: o nome do campo é o próprio título
     .sfp-btn {
         position: relative; display: inline-flex; align-items: center; gap: 7px;
-        max-width: 240px; padding: 5px 9px 5px 11px; border-radius: var(--r); background: var(--bg);
-        box-shadow: inset 0 0 0 1px var(--line); font-weight: 500; letter-spacing: .01em; white-space: nowrap;
+        max-width: 240px; height: 24px; padding: 0 8px 0 10px; border-radius: 4px; background: var(--bg);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 20%, var(--bg)); font-weight: 500; white-space: nowrap;
         transition: background .12s ease, box-shadow .12s ease;
         &::before { content: ""; position: absolute; left: 8px; right: 8px; top: 0; height: 2px; border-radius: 0 0 2px 2px;
             background: var(--acc); transform: scaleX(0); transition: transform .16s ease; }
@@ -67,9 +67,10 @@
     }
     .sfp-ico { flex: none; width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; color: var(--muted);
         circle { fill: var(--bg); } }
+    .sfp-btn.sfp-more { height: 26px; padding: 0 10px; }
     .sfp-more:hover .sfp-ico, .sfp-more.open .sfp-ico { color: var(--fg); }
-    .sfp-sep { width: 1px; height: 18px; margin: 0 2px; background: var(--line); }
-    .sfp-clear { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; margin-left: 2px; border-radius: var(--r);
+    .sfp-sep { display: none; width: 1px; height: 18px; margin: 0 2px; background: var(--line); }
+    .sfp-clear { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; margin-left: 6px; border-radius: 4px;
         color: var(--danger); font-weight: 500; font-size: .94em; white-space: nowrap;
         &:hover:not(:disabled) { background: color-mix(in srgb, var(--danger) 12%, var(--bg)); }
         &.off { opacity: .4; cursor: default; }
@@ -185,8 +186,10 @@
         &:hover { background: var(--wash); } }
     .sfp-acc-t { font-weight: 600; flex: none; }
     .sfp-acc-v { flex: 1; min-width: 0; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
-    .sfp-caret { flex: none; width: 7px; height: 7px; border: solid var(--muted); border-width: 0 2px 2px 0; transform: rotate(45deg); transition: transform .14s ease; margin: 0 4px 3px 2px; }
-    .sfp-acc.open .sfp-caret { transform: rotate(-135deg); margin-bottom: -2px; }
+    .sfp-caret { flex: none; width: 14px; text-align: center; font-size: 18px; line-height: 1; font-weight: 400; color: var(--muted); margin: 0 2px; }
+    .sfp-apply-bar { padding: 8px 10px 10px; border-top: 1px solid var(--line, rgba(128,128,128,.25)); }
+    .sfp-apply { width: 100%; padding: 9px 12px; border-radius: var(--r); background: var(--acc); color: #fff; font-weight: 600; text-align: center;
+        &:hover { filter: brightness(1.08); } }
     .sfp-acc-b { padding: 0 2px 8px; }
     .sfp-acc-b .sfp-scroll { max-height: 240px; }
     .sfp-acc-b .sfp-foot { border-top: 0; }

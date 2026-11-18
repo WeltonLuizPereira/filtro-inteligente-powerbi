@@ -42,7 +42,7 @@ class LayoutCard extends Card {
 }
 
 class CabecalhoCard extends Card {
-    altura = num("altura", "Altura do cabeçalho / do logo (px)", 60);
+    altura = num("altura", "Altura do cabeçalho / do logo (px)", 40);
     corFundo = col("corFundo", "Cor de fundo", "#FFFFFF");
     fundoTransparente = tg("fundoTransparente", "Fundo transparente", false);
     mostrarLogo = tg("mostrarLogo", "Mostrar logo", false);

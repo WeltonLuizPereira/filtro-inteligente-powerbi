@@ -120,6 +120,8 @@ export class Visual implements IVisual {
             this.open = NONE; // painel aberto de um estilo não vale no outro
         }
         this.restored = (options.jsonFilters as models.IFilter[]) || [];
+        this.lastDv = dv;
+        this.pending = false;
         this.fields = this.parse(dv);
         if (this.open >= this.fields.length) this.open = NONE;
         this.render();
@@ -201,7 +203,16 @@ export class Visual implements IVisual {
         return r.items;
     }
 
+    /** No painel "Mais Filtros" as escolhas ficam pendentes até o botão "Aplicar Filtros". */
+    private pending = false;
+    private lastDv: DataView | undefined;
+
     private apply(): void {
+        this.commit();
+    }
+
+    private commit(): void {
+        this.pending = false;
         const filters: models.BasicFilter[] = this.fields
             .filter((f) => f.selected.size > 0)
             .map((f) => new models.BasicFilter(f.target, "In", f.items.filter((i) => f.selected.has(i.key)).map((i) => i.value as any)));
@@ -217,12 +228,16 @@ export class Visual implements IVisual {
         this.render();
     }
 
-    private close(): void { this.open = NONE; this.render(); }
+    private close(): void {
+        if (this.pending) { this.pending = false; this.fields = this.parse(this.lastDv); } // descarta o que não foi aplicado
+        this.open = NONE;
+        this.render();
+    }
     private totalSel = () => this.fields.reduce((a, f) => a + f.selected.size, 0);
 
     private clearAll(): void {
         this.fields.forEach((f) => f.selected.clear());
-        this.apply();
+        this.commit();
         this.render();
     }
 
@@ -287,7 +302,7 @@ export class Visual implements IVisual {
         s.setProperty("--r", `${Math.max(0, a.raio.value ?? 10)}px`);
         s.setProperty("--font", `"${a.fonte.value.value}", "Segoe UI", sans-serif`);
         const h = this.settings.cabecalho;
-        const want = Math.min(200, Math.max(36, Math.round(h.altura.value || 60)));
+        const want = Math.min(200, Math.max(36, Math.round(h.altura.value || 40)));
         const sw = Math.min(420, Math.max(160, Math.round(this.settings.layout.larguraMenu.value || 240)));
         s.setProperty("--sw", `${Math.min(sw, Math.max(120, this.width - 8))}px`);
         s.setProperty("--hh", `${Math.min(want, Math.max(36, this.height - 8))}px`);
@@ -572,7 +587,7 @@ export class Visual implements IVisual {
         c.appendChild(this.el("span", "sfp-chip-v", it.display || this.t.blank));
         c.appendChild(this.el("span", "sfp-x", "×"));
         c.setAttribute("aria-label", this.t.remove(f.name, it.display));
-        c.addEventListener("click", (e) => { f.selected.delete(it.key); this.apply(); this.render(); });
+        c.addEventListener("click", (e) => { f.selected.delete(it.key); this.commit(); this.render(); });
         return c;
     }
 
@@ -585,6 +600,12 @@ export class Visual implements IVisual {
             wrap.dataset.scroll = "more";
             this.fields.slice(nMain).forEach((f, k) => wrap.appendChild(this.accordion(f, nMain + k)));
             panel.appendChild(wrap);
+            const bar = this.el("div", "sfp-apply-bar");
+            const go = this.el("button", "sfp-apply", this.t.applyFilters);
+            go.type = "button";
+            go.addEventListener("click", () => { this.commit(); this.close(); });
+            bar.appendChild(go);
+            panel.appendChild(bar);
             panel.classList.add("wide");
         } else {
             this.fillFieldPanel(panel, this.fields[this.open]);
@@ -669,7 +690,7 @@ export class Visual implements IVisual {
         h.setAttribute("aria-expanded", String(open));
         h.appendChild(this.el("span", "sfp-acc-t", f.name));
         h.appendChild(this.el("span", "sfp-acc-v", f.selected.size ? this.label(f) : ""));
-        h.appendChild(this.el("span", "sfp-caret"));
+        h.appendChild(this.el("span", "sfp-caret", open ? "−" : "+"));
         h.addEventListener("click", (e) => {
             if (open) this.expanded.delete(i); else this.expanded.add(i);
             this.render();
