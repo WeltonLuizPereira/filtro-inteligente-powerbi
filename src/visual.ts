@@ -82,8 +82,14 @@ export class Visual implements IVisual {
         this.root = document.createElement("div");
         this.root.className = "sfp";
         options.element.appendChild(this.root);
+        // O Power BI só mantém o visual em evidência (à frente dos outros) enquanto o iframe tem foco.
+        // Como o render recria o DOM, o botão clicado some e o foco se perderia: o root guarda o foco.
+        this.root.tabIndex = -1;
+        this.root.addEventListener("pointerdown", () => this.keepFocus());
+        // Clique em outro visual do relatório: o iframe perde o foco e o painel aberto fecha.
+        window.addEventListener("blur", () => { if (this.open !== NONE) this.close(); });
         this.root.addEventListener("click", (e) => {
-            if (this.open !== NONE && !(e.target as HTMLElement).closest(".sfp-btn,.sfp-panel")) this.close();
+            if (this.open !== NONE && !(e.target as HTMLElement).closest(".sfp-btn,.sfp-panel,.sfp-clear,.sfp-chip,.sfp-acc-h")) this.close();
         });
         this.root.addEventListener("dragover", (e) => { if (this.canEdit && this.settings.cabecalho.mostrarLogo.value) e.preventDefault(); });
         this.root.addEventListener("drop", (e) => {
@@ -376,7 +382,7 @@ export class Visual implements IVisual {
             add.type = "button";
             add.appendChild(this.el("span", "sfp-logo-plus", "+"));
             add.appendChild(this.el("span", "", this.logoMsg || this.t.addLogo));
-            add.addEventListener("click", (e) => { e.stopPropagation(); this.pickLogo(); });
+            add.addEventListener("click", (e) => { this.pickLogo(); });
             b.appendChild(add);
         }
         if (src) {
@@ -390,10 +396,10 @@ export class Visual implements IVisual {
                 const tools = this.el("div", "sfp-logo-tools");
                 const swap = this.el("button", "sfp-logo-btn", "↻");
                 swap.type = "button"; swap.title = this.t.changeLogo; swap.setAttribute("aria-label", this.t.changeLogo);
-                swap.addEventListener("click", (e) => { e.stopPropagation(); this.pickLogo(); });
+                swap.addEventListener("click", (e) => { this.pickLogo(); });
                 const del = this.el("button", "sfp-logo-btn", "×");
                 del.type = "button"; del.title = this.t.removeLogo; del.setAttribute("aria-label", this.t.removeLogo);
-                del.addEventListener("click", (e) => { e.stopPropagation(); this.removeLogo(); });
+                del.addEventListener("click", (e) => { this.removeLogo(); });
                 tools.appendChild(swap); tools.appendChild(del);
                 box.appendChild(tools);
             }
@@ -447,6 +453,17 @@ export class Visual implements IVisual {
             const e = this.root.querySelector<HTMLInputElement>(`.sfp-search[data-fi="${focus.fi}"]`);
             if (e) { e.focus(); if (focus.pos !== null) e.setSelectionRange(focus.pos, focus.pos); }
         }
+        if (this.hadFocus) this.keepFocus();
+    }
+
+    private hadFocus = false;
+
+    /** Devolve o foco ao visual quando o redesenho descartou o elemento que o tinha. */
+    private keepFocus(): void {
+        this.hadFocus = true;
+        const doc = this.root.ownerDocument;
+        const ae = doc.activeElement;
+        if (!ae || ae === doc.body || ae === doc.documentElement) this.root.focus({ preventScroll: true });
     }
 
     /* ---- horizontal ---- */
@@ -476,7 +493,7 @@ export class Visual implements IVisual {
             b.appendChild(this.el("span", "sfp-name", this.t.more));
             if (extra) b.appendChild(this.el("span", "sfp-pill", String(extra)));
             b.appendChild(this.el("span", "sfp-chev"));
-            b.addEventListener("click", (e) => { e.stopPropagation(); this.open = this.open === MORE ? NONE : MORE; this.render(); });
+            b.addEventListener("click", (e) => { this.open = this.open === MORE ? NONE : MORE; this.render(); });
             btns.push(b);
             bar.appendChild(b);
         }
@@ -505,7 +522,7 @@ export class Visual implements IVisual {
         const p = this.pill(f);
         if (p) b.appendChild(this.el("span", "sfp-pill", p));
         b.appendChild(this.el("span", "sfp-chev"));
-        b.addEventListener("click", (e) => { e.stopPropagation(); onClick(); });
+        b.addEventListener("click", (e) => { onClick(); });
         return b;
     }
 
@@ -527,7 +544,7 @@ export class Visual implements IVisual {
         c.disabled = off;
         c.appendChild(this.el("span", "sfp-clear-x", "×"));
         c.appendChild(this.el("span", "", this.t.clearAll));
-        c.addEventListener("click", (e) => { e.stopPropagation(); this.clearAll(); });
+        c.addEventListener("click", (e) => { this.clearAll(); });
         return c;
     }
 
@@ -555,14 +572,13 @@ export class Visual implements IVisual {
         c.appendChild(this.el("span", "sfp-chip-v", it.display || this.t.blank));
         c.appendChild(this.el("span", "sfp-x", "×"));
         c.setAttribute("aria-label", this.t.remove(f.name, it.display));
-        c.addEventListener("click", (e) => { e.stopPropagation(); f.selected.delete(it.key); this.apply(); this.render(); });
+        c.addEventListener("click", (e) => { f.selected.delete(it.key); this.apply(); this.render(); });
         return c;
     }
 
     private renderPopover(header: HTMLElement, anchor: HTMLElement, nMain: number): void {
         const panel = this.el("div", "sfp-panel");
         panel.setAttribute("role", "dialog");
-        panel.addEventListener("click", (e) => e.stopPropagation());
         const isMore = this.open === MORE;
         if (isMore) {
             const wrap = this.el("div", "sfp-acc-wrap");
@@ -625,7 +641,6 @@ export class Visual implements IVisual {
         const f = this.fields[this.open];
         const panel = this.el("div", "sfp-panel fly");
         panel.setAttribute("role", "dialog");
-        panel.addEventListener("click", (e) => e.stopPropagation());
         this.fillFieldPanel(panel, f);
         this.root.appendChild(panel);
 
@@ -656,7 +671,6 @@ export class Visual implements IVisual {
         h.appendChild(this.el("span", "sfp-acc-v", f.selected.size ? this.label(f) : ""));
         h.appendChild(this.el("span", "sfp-caret"));
         h.addEventListener("click", (e) => {
-            e.stopPropagation();
             if (open) this.expanded.delete(i); else this.expanded.add(i);
             this.render();
         });
@@ -789,7 +803,7 @@ export class Visual implements IVisual {
                     row.appendChild(b);
                     if (!single) {
                         const o = this.el("button", "sfp-only", t.only); o.type = "button";
-                        o.addEventListener("click", (e) => { e.stopPropagation(); this.only(f, it); });
+                        o.addEventListener("click", (e) => { this.only(f, it); });
                         row.appendChild(o);
                     }
                     box.appendChild(row);

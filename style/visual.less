@@ -1,5 +1,6 @@
 // Filtro Inteligente — tokens vêm de variáveis CSS definidas em visual.ts (applyTheme)
 .sfp {
+  outline: none;
     --muted: color-mix(in srgb, var(--fg) 56%, var(--bg));
     --line: color-mix(in srgb, var(--fg) 14%, var(--bg));
     --wash: color-mix(in srgb, var(--fg) 5%, var(--bg));
@@ -87,12 +88,12 @@
 
     /* ---------- painel ---------- */
     .sfp-panel {
-        position: absolute; z-index: 5; width: 320px; max-width: calc(100% - 12px);
+        position: absolute; z-index: 5; width: 264px; max-width: calc(100% - 12px);
         display: flex; flex-direction: column; overflow: hidden;
         background: var(--panel); border-radius: var(--r-lg); box-shadow: 0 0 0 1px var(--line);
         transform-origin: top left; animation: sfp-in .14s ease-out;
-        &.grid-panel { width: 340px; }
-        &.wide { width: 340px; }
+        &.grid-panel { width: 284px; }
+        &.wide { width: 284px; }
         &.overlay { inset: 6px; width: auto; max-width: none; }
     }
     &.shadow .sfp-panel { box-shadow: 0 0 0 1px var(--line), 0 14px 34px -8px rgba(0,0,0,.32); }
