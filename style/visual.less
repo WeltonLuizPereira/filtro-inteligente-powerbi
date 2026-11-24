@@ -175,6 +175,7 @@
     // sub-menu que desliza para a direita do botão
     .sfp-panel.fly { animation-name: sfp-in-x; transform-origin: left center; }
     @keyframes sfp-in-x { from { opacity: 0; transform: translateX(-8px) scale(.98); } to { opacity: 1; transform: none; } }
+    .sfp-panel.still, .sfp-panel.fly.still { animation: none; }
 
     // sanfona (usada no painel "Mais Filtros" do cabeçalho)
     .sfp-acc-wrap { overflow-y: auto; padding: 4px 8px 10px; max-height: 100%; }

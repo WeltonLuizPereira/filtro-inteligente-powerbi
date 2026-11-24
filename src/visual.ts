@@ -137,6 +137,8 @@ export class Visual implements IVisual {
     }
 
     private lastSig = "";
+    private still = false;
+    private lastOpenDrawn = NONE;
 
     private viewSig(dv?: DataView): string {
         let h = 0;
@@ -498,6 +500,9 @@ export class Visual implements IVisual {
 
     private render(): void {
         this.lastSig = this.viewSig(this.lastDv); // registra o que está na tela, para update() pular redesenhos iguais
+        // painel que já estava aberto não repete a animação de entrada (era isso que fazia o filtro "piscar")
+        this.still = this.open !== NONE && this.open === this.lastOpenDrawn;
+        this.lastOpenDrawn = this.open;
         // preserva rolagem e foco da busca entre redesenhos
         const scrolls = new Map<string, number>();
         this.root.querySelectorAll<HTMLElement>("[data-scroll]").forEach((e) => scrolls.set(e.dataset.scroll as string, e.scrollTop));
@@ -648,7 +653,7 @@ export class Visual implements IVisual {
     }
 
     private renderPopover(header: HTMLElement, anchor: HTMLElement, nMain: number): void {
-        const panel = this.el("div", "sfp-panel");
+        const panel = this.el("div", "sfp-panel" + (this.still ? " still" : ""));
         panel.setAttribute("role", "dialog");
         const isMore = this.open === MORE;
         if (isMore) {
@@ -716,7 +721,7 @@ export class Visual implements IVisual {
     /** Sub-menu: abre à direita do botão clicado; sem espaço, cobre o menu com botão de fechar. */
     private renderFly(side: HTMLElement, btn: HTMLElement): void {
         const f = this.fields[this.open];
-        const panel = this.el("div", "sfp-panel fly");
+        const panel = this.el("div", "sfp-panel fly" + (this.still ? " still" : ""));
         panel.setAttribute("role", "dialog");
         this.fillFieldPanel(panel, f);
         this.root.appendChild(panel);

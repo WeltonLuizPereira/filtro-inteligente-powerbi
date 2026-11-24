@@ -4,7 +4,7 @@
         "displayName": "Filtro Inteligente",
         "guid": "filtroInteligenteProA1B2C3D4E5F60718293A4B5C6D7E8F90",
         "visualClassName": "Visual",
-        "version": "2.1.7.0",
+        "version": "2.1.8.0",
         "description": "Filtros com ordenacao inteligente (meses, dias, numeros e datas), em cabecalho ou menu lateral.",
         "supportUrl": "https://github.com/WeltonLuizPereira/filtro-inteligente-powerbi/issues",
         "gitHubUrl": "https://github.com/WeltonLuizPereira/filtro-inteligente-powerbi"
