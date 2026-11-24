@@ -1,6 +1,6 @@
 {
   "name": "filtro-inteligente-pro",
-  "version": "2.1.5",
+  "version": "2.1.7",
   "description": "Visual do Power BI: filtros com ordenacao inteligente (meses, dias, numeros, datas), cabecalho ou menu lateral.",
   "scripts": {
     "test": "tsc test/sort.test.ts src/sort.ts --outDir .testout --target es2019 --module commonjs --lib es2019 --skipLibCheck && node .testout/test/sort.test.js && node tools/audit.js",

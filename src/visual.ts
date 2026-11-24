@@ -14,13 +14,15 @@ import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructor
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import DataView = powerbi.DataView;
 
-interface FieldItem extends SortItem { key: string; }
+interface FieldItem extends SortItem { key: string; idx: number; }
 interface Field {
     name: string;
     target: models.IFilterColumnTarget;
     items: FieldItem[];
+    rows: Int32Array; // índice do item em cada linha de dados (para o cruzamento entre filtros)
     selected: Set<string>;
     kind: string;
+    kindOk?: boolean;
     lastKey?: string;
 }
 
@@ -106,7 +108,10 @@ export class Visual implements IVisual {
         this.width = options.viewport.width;
         this.height = options.viewport.height;
         const dv: DataView | undefined = options.dataViews && options.dataViews[0];
-        this.settings = this.formatting.populateFormattingSettingsModel(VisualSettings, dv);
+        // O Power BI entrega os dados em lotes de 30.000 linhas: pede os próximos até acabar,
+        // senão os valores das últimas linhas (ex.: meses/supervisores recentes) não apareceriam.
+        if (dv && dv.metadata && dv.metadata.segment && this.host.fetchMoreData(true)) return;
+        this.settings =this.formatting.populateFormattingSettingsModel(VisualSettings, dv);
         this.sortMode = this.settings.ordenacao.modo.value.value as SortMode;
         this.lang = this.settings.layout.idioma.value.value as Lang;
         const side = this.settings.layout.orientacao.value.value === "vertical";
@@ -124,7 +129,26 @@ export class Visual implements IVisual {
         this.pending = false;
         this.fields = this.parse(dv);
         if (this.open >= this.fields.length) this.open = NONE;
+        // Só redesenha se o que aparece mudou de verdade (evita o "piscar" quando o Power BI reenvia os mesmos dados).
+        const sig = this.viewSig(dv);
+        if (sig === this.lastSig) return;
+        this.lastSig = sig;
         this.render();
+    }
+
+    private lastSig = "";
+
+    private viewSig(dv?: DataView): string {
+        let h = 0;
+        for (const f of this.fields) {
+            for (let i = 0; i < f.rows.length; i++) h = (Math.imul(h, 31) + f.rows[i] + 1) | 0;
+            for (const it of f.items) {
+                for (let i = 0; i < it.key.length; i++) h = (Math.imul(h, 31) + it.key.charCodeAt(i)) | 0;
+            }
+        }
+        const objs = dv && dv.metadata && dv.metadata.objects ? JSON.stringify(dv.metadata.objects) : "";
+        const sel = this.fields.map((f) => Array.from(f.selected).sort().join("|")).join(";");
+        return [h, this.fields.map((f) => f.name).join("|"), sel, objs, this.width, this.height, this.canEdit, this.lang, this.open].join("§");
     }
 
     public destroy(): void {
@@ -142,21 +166,24 @@ export class Visual implements IVisual {
     /* ================= dados ================= */
     private parse(dv?: DataView): Field[] {
         const cats = dv && dv.categorical && dv.categorical.categories;
+        this.availCache = new Map();
         if (!cats) return [];
         const out: Field[] = [];
         cats.forEach((cat) => {
             const map = new Map<string, FieldItem>();
+            const rows = new Int32Array(cat.values.length);
             cat.values.forEach((v, i) => {
                 const k = keyOf(v);
                 const hit = map.get(k);
-                if (hit) hit.count++;
-                else map.set(k, { key: k, value: v, display: fmt(v), count: 1, firstIndex: i });
+                if (hit) { hit.count++; rows[i] = hit.idx; }
+                else { rows[i] = map.size; map.set(k, { key: k, value: v, display: fmt(v), count: 1, firstIndex: i, idx: map.size }); }
             });
             const target = interactivityFilterService.extractFilterColumnTarget(cat);
             const field: Field = {
                 name: cat.source.displayName,
                 target,
                 items: Array.from(map.values()),
+                rows,
                 selected: new Set<string>(),
                 kind: "text",
             };
@@ -197,9 +224,37 @@ export class Visual implements IVisual {
         try { const j = JSON.parse(json); return j && typeof j === "object" ? j : {}; } catch { return {}; }
     }
 
+    private availCache = new Map<Field, { sig: string; counts: Int32Array }>();
+
+    /** Como nos filtros nativos: as opções de um campo respeitam o que está marcado nos outros campos. */
+    private availCounts(f: Field): Int32Array {
+        const others = this.fields.filter((g) => g !== f && g.selected.size > 0 && g.rows.length === f.rows.length);
+        const sig = others.map((g) => this.fields.indexOf(g) + ":" + Array.from(g.selected).sort().join("|")).join(";");
+        const hit = this.availCache.get(f);
+        if (hit && hit.sig === sig) return hit.counts;
+        const flags = others.map((g) => {
+            const a = new Uint8Array(g.items.length);
+            g.items.forEach((it, i) => { if (g.selected.has(it.key)) a[i] = 1; });
+            return a;
+        });
+        const counts = new Int32Array(f.items.length);
+        const n = f.rows.length;
+        for (let r = 0; r < n; r++) {
+            let ok = true;
+            for (let k = 0; k < others.length; k++) if (!flags[k][others[k].rows[r]]) { ok = false; break; }
+            if (ok) counts[f.rows[r]]++;
+        }
+        this.availCache.set(f, { sig, counts });
+        return counts;
+    }
+
     private sorted(f: Field): FieldItem[] {
-        const r = sortItems(f.items, this.modeOf(f));
-        f.kind = r.kind;
+        const c = this.availCounts(f);
+        const view = f.items.filter((it) => c[it.idx] > 0 || f.selected.has(it.key)).map((it) => ({ ...it, count: c[it.idx] }));
+        const r = sortItems(view, this.modeOf(f));
+        // o tipo (mês, número, texto…) vem sempre da lista completa, para o layout não mudar ao filtrar
+        if (view.length === f.items.length) { f.kind = r.kind; f.kindOk = true; }
+        else if (!f.kindOk) { f.kind = sortItems(f.items, this.modeOf(f)).kind; f.kindOk = true; }
         return r.items;
     }
 
@@ -442,6 +497,7 @@ export class Visual implements IVisual {
     }
 
     private render(): void {
+        this.lastSig = this.viewSig(this.lastDv); // registra o que está na tela, para update() pular redesenhos iguais
         // preserva rolagem e foco da busca entre redesenhos
         const scrolls = new Map<string, number>();
         this.root.querySelectorAll<HTMLElement>("[data-scroll]").forEach((e) => scrolls.set(e.dataset.scroll as string, e.scrollTop));
@@ -832,7 +888,7 @@ export class Visual implements IVisual {
             });
             if (!shown.length) box.appendChild(this.el("div", "sfp-empty", t.empty));
             scroller.appendChild(box);
-            foot.textContent = t.nOf(f.selected.size, f.items.length);
+            foot.textContent = t.nOf(f.selected.size, this.sorted(f).length);
         };
         draw();
         input.addEventListener("input", draw);
